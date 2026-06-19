@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system xmlns:chan="urn:fsm:channel:1.0">
+    <chan:channels>
+        <chan:channel id="ch_sg" type="integer" capacity="0"/>
+        <chan:channel id="ch_gc" type="integer" capacity="0"/>
+        <chan:channel id="ch_cg" type="integer" capacity="0"/>
+    </chan:channels>
+
+<!-- Sensor -->
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+    id="sensor"
+    initial="State_0"
+    version="1.0">
+    <state id="State_0">
+        <transition
+            event="SEND_DATA"
+            target="State_1"
+            chan:send="ch_sg"
+            chan:value="1"/>
+    </state>
+
+    <state id="State_1">
+        <transition
+            event="TRANSIT_EVENT"
+            target="State_0"
+            chan:delay="PT0.1S"/>
+    </state>
+</scxml>
+
+<!-- Gateway -->
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+    id="gateway"
+    initial="State_0"
+    version="1.0">
+    <state id="State_0">
+        <transition
+            event="RECEIVE_DATA"
+            target="State_1"
+            cond="_event.data.channel == 'ch_sg' and _event.data.value == 1"
+            chan:listen="ch_sg"
+            chan:expected="1"
+            chan:delay="PT0.1S"/>
+    </state>
+    <state id="State_1">
+        <transition
+            event="FORWARD_DATA"
+            target="State_2"
+            chan:send="ch_gc"
+            chan:value="1"
+            chan:delay="PT0.2S"/>
+    </state>
+    <state id="State_2">
+    <transition
+        event="RECEIVE_ACK"
+        target="State_0"
+        cond="_event.data.channel == 'ch_cg' and _event.data.value == 2"
+        chan:listen="ch_cg"
+        chan:expected="2"
+        chan:delay="PT0.5S"/>
+    </state>
+</scxml>
+
+<!-- Cloud -->
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+    id="cloud"
+    initial="State_0"
+    version="1.0">
+    <state id="State_0">
+        <transition
+            event="RECEIVE_FORWARD"
+            target="State_1"
+            cond="_event.data.channel == 'ch_gc' and _event.data.value == 1"
+            chan:listen="ch_gc"
+            chan:expected="1"
+            chan:delay="PT0.5S"/>
+    </state>
+    <state id="State_1">
+    <transition
+        event="SEND_ACK"
+        target="State_0"
+        chan:send="ch_cg"
+        chan:value="2"
+        chan:delay="PT0.3S"/>
+    </state>
+    </scxml>
+</system>
