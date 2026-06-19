@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JAR_URL="https://github.com/username/repo/releases/download/v1.0/my-app.jar"
+JAR_URL="https://github.com/strangecodder/CLIModeller/releases/download/release/CLIModeller-1.0-SNAPSHOT.jar"
 
 APP_NAME="cfsm-modeller"
 
